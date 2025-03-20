@@ -1,4 +1,4 @@
-const http = require('node:http');
+const http = require('node:http'); // Protocolo HTTP
 const { findAvailablePort } = require('./10.free-port');
 
 const desiredPort = process.env.PORT ?? 3000;
