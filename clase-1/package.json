@@ -1,0 +1,31 @@
+{
+  "name": "nodejs",
+  "version": "1.0.0",
+  "description": "El mejor curso de Node por $0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JuanjoRestrepo/NodeJs.git"
+  },
+  "keywords": [
+    "curso",
+    "node",
+    "nodejs",
+    "midudev"
+  ],
+  "author": "Juan Jose Restrepo Rosero",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/JuanjoRestrepo/NodeJs/issues"
+  },
+  "homepage": "https://github.com/JuanjoRestrepo/NodeJs#readme",
+  "dependencies": {
+    "picocolors": "1.1.1"
+  },
+  "devDependencies": {
+    "standard": "^17.1.2"
+  }
+}
