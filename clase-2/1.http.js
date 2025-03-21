@@ -22,7 +22,7 @@ const processRequest = (req, res) => {
   } else if (req.url === '/contacto') {
     res.end('<h1>Contacto</h1>');
   } else {
-    res.end('<h1>404 Not Found</h1>');
+    res.end('<h1>404</h1>');
   }
 };
 
