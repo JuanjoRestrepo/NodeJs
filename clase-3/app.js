@@ -38,15 +38,17 @@ app.get('/movies/:id', (req, res) => {
 
 app.post('/movies', (req, res) => {
   const result = validateMovie(req.body);
-  if (result.error) {
+
+  if (!result.success) {
     // 422 Unprocessable Entity
     // 400 Bad Request. Error propio del cliente. La solicitud contiene sintaxis incorrecta y no debería repetirse.
     return res.status(400).json({ error: JSON.parse(result.error.message) });
   }
 
+  // en base de datos
   const newMovie = {
     id: crypto.randomUUID(), // uuid v4
-    ...result.data,
+    ...result.data, // ❌ req.body. != No es lo mismo
   };
   // Esto no seria REST, porque estamos guardando
   // el estado de la aplicacion en memoria

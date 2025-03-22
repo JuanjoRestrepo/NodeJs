@@ -12,6 +12,10 @@ POST http://localhost:1234/movies
 Content-Type: application/json
 
 {
-  "title": 1,
-  "year": "pepote"
+  "title": "The Matrix",
+  "year": 1999,
+  "director": "Lana Wachowski",
+  "duration": 136,
+  "poster": "https://example.com/matrix.jpg",
+  "genre": ["Action", "Sci-Fi"]
 }
