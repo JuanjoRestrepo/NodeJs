@@ -33,10 +33,15 @@ const movieSchema = z.object({
   ),
 });
 
-function validateMovie(object) {
-  return movieSchema.safeParse(object); // devuelve un objeto que dice si es valido o no
+function validateMovie(input) {
+  return movieSchema.safeParse(input); // devuelve un objeto que dice si es valido o no
+}
+
+function validatePartialMovie(input) {
+  return movieSchema.partial().safeParse(input);
 }
 
 module.exports = {
   validateMovie,
+  validatePartialMovie,
 };

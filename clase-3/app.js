@@ -3,6 +3,7 @@ const crypto = require('node:crypto'); // modulo de node para hashear
 const movies = require('./movies.json');
 const { error } = require('node:console');
 const { validateMovie } = require('./schemas/movies');
+const { validatePartialMovie } = require('./schemas/movies');
 
 const app = express();
 app.use(express.json()); // middleware que parsea el body de la request a JSON
@@ -55,6 +56,30 @@ app.post('/movies', (req, res) => {
   movies.push(newMovie);
 
   res.status(201).json(newMovie);
+});
+
+app.patch('/movies/:id', (req, res) => {
+  const result = validatePartialMovie(req.body);
+
+  if (!result.success) {
+    return res.status(400).json({ error: JSON.parse(result.error.message) });
+  }
+
+  const { id } = req.params;
+  const movieIndex = movies.findIndex((movie) => movie.id === id);
+
+  if (movieIndex === -1) {
+    return res.status(404).json({ message: 'Movie not found' });
+  }
+
+  const updatedMovie = {
+    ...movies[movieIndex],
+    ...result.data,
+  };
+
+  movies[movieIndex] = updatedMovie;
+
+  return res.json(updatedMovie);
 });
 
 const PORT = process.env.PORT ?? 1234; // si PORT no esta definido en el entorno, usamos 1234

@@ -12,10 +12,21 @@ POST http://localhost:1234/movies
 Content-Type: application/json
 
 {
+  "sql": "SELECT * FROM users",
   "title": "The Matrix",
   "year": 1999,
   "director": "Lana Wachowski",
   "duration": 136,
   "poster": "https://example.com/matrix.jpg",
   "genre": ["Action", "Sci-Fi"]
+}
+
+
+### Actualizar una película
+PATCH http://localhost:1234/movies/dcdd0fad-a94c-4810-8acc-5f108d3b18c3
+Content-Type: application/json
+
+{
+  "title": "Hola",
+  "year": "1998"
 }
