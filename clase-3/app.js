@@ -1,16 +1,32 @@
 const express = require('express'); // usamos require luego pasaremos a commonJS
 const crypto = require('node:crypto'); // modulo de node para hashear
 const movies = require('./movies.json');
-const { error } = require('node:console');
-const { validateMovie } = require('./schemas/movies');
-const { validatePartialMovie } = require('./schemas/movies');
+const { validateMovie, validatePartialMovie } = require('./schemas/movies');
 
 const app = express();
 app.use(express.json()); // middleware que parsea el body de la request a JSON
 app.disable('x-powered-by'); // deshabilitamos la cabecera X-Powered-By: Express
 
+// metodos normales: GET/HEAD/POST
+// meotodos complejos: PUT/DELETE/PATCH
+
+// CORS: PRE-FLIGHT
+// OPTIONS
+
+const ACCEPTED_ORIGINS = [
+  'http://localhost:8080',
+  'http://localhost:1234',
+  'https://movies.com',
+  'https://midu.dev',
+];
 // Todos los recursos que sean MOVIES se identifican con  /movies
 app.get('/movies', (req, res) => {
+  const origin = req.get('origin');
+  // cuando la peticion es del mismo ORIGIN
+  if (ACCEPTED_ORIGINS.includes(origin) || !origin) {
+    res.header('Access-Control-Allow-Origin', origin);
+  }
+
   const { genre } = req.query;
   if (genre) {
     const filteredMovies = movies.filter(
@@ -58,6 +74,19 @@ app.post('/movies', (req, res) => {
   res.status(201).json(newMovie);
 });
 
+app.delete('/movies/:id', (req, res) => {
+  const { id } = req.params;
+  const movieIndex = movies.findIndex((movie) => movie.id === id);
+
+  if (movieIndex === -1) {
+    return res.status(404).json({ message: 'Movie not found' });
+  }
+
+  movies.splice(movieIndex, 1);
+
+  return res.json({ message: 'Movie deleted' });
+});
+
 app.patch('/movies/:id', (req, res) => {
   const result = validatePartialMovie(req.body);
 
@@ -80,6 +109,15 @@ app.patch('/movies/:id', (req, res) => {
   movies[movieIndex] = updatedMovie;
 
   return res.json(updatedMovie);
+});
+
+app.options('/movies', (req, res) => {
+  const origin = req.get('origin');
+  if (ACCEPTED_ORIGINS.includes(origin) || !origin) {
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT,PATCH, DELETE');
+  }
+  res.status(200);
 });
 
 const PORT = process.env.PORT ?? 1234; // si PORT no esta definido en el entorno, usamos 1234
