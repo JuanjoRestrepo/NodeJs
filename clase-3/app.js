@@ -1,10 +1,12 @@
 const express = require('express'); // usamos require luego pasaremos a commonJS
 const crypto = require('node:crypto'); // modulo de node para hashear
+const cors = require('cors');
 const movies = require('./movies.json');
 const { validateMovie, validatePartialMovie } = require('./schemas/movies');
 
 const app = express();
 app.use(express.json()); // middleware que parsea el body de la request a JSON
+app.use(cors());
 app.disable('x-powered-by'); // deshabilitamos la cabecera X-Powered-By: Express
 
 // metodos normales: GET/HEAD/POST
@@ -75,6 +77,11 @@ app.post('/movies', (req, res) => {
 });
 
 app.delete('/movies/:id', (req, res) => {
+  const origin = req.header('origin');
+  if (ACCEPTED_ORIGINS.includes(origin) || !origin) {
+    res.header('Access-Control-Allow-Origin', origin);
+  }
+
   const { id } = req.params;
   const movieIndex = movies.findIndex((movie) => movie.id === id);
 

@@ -17,9 +17,9 @@
         max-width: 100%;
       }
     </style>
-    <body>
-      <main></main>
-    </body>
+  </head>
+  <body>
+    <main></main>
     <script type="module">
       fetch('http://localhost:1234/movies')
         .then((res) => res.json())
@@ -31,7 +31,6 @@
                 <h2>${movie.title}</h2>
                 <img src="${movie.poster}" alt="${movie.title}" />
                 <p>${movie.year}</p>
-
                 <button>Eliminar</button>
               </article>
             `;
@@ -47,16 +46,14 @@
 
               fetch(`http://localhost:1234/movies/${id}`, {
                 method: 'DELETE',
-              })
-                .then((res) => res.json())
-                .then((res) => {
-                  if (res.ok) {
-                    article.remove();
-                  }
-                });
+              }).then((res) => {
+                if (res.ok) {
+                  article.remove();
+                }
+              });
             }
           });
         });
     </script>
-  </head>
+  </body>
 </html>
