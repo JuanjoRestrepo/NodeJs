@@ -1,39 +1,48 @@
 const express = require('express'); // usamos require luego pasaremos a commonJS
 const crypto = require('node:crypto'); // modulo de node para hashear
 const cors = require('cors');
+
 const movies = require('./movies.json');
 const { validateMovie, validatePartialMovie } = require('./schemas/movies');
 
 const app = express();
 app.use(express.json()); // middleware que parsea el body de la request a JSON
-app.use(cors());
-app.disable('x-powered-by'); // deshabilitamos la cabecera X-Powered-By: Express
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      const ACCEPTED_ORIGINS = [
+        'http://localhost:8080',
+        'http://localhost:1234',
+        'https://movies.com',
+        'https://midu.dev',
+      ];
 
-// metodos normales: GET/HEAD/POST
-// meotodos complejos: PUT/DELETE/PATCH
+      if (ACCEPTED_ORIGINS.includes(origin)) {
+        return callback(null, true);
+      }
 
-// CORS: PRE-FLIGHT
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      return callback(new Error('Not allowed by CORS'));
+    },
+  })
+);
+app.disable('x-powered-by'); // deshabilitar el header X-Powered-By: Express
+
+// métodos normales: GET/HEAD/POST
+// métodos complejos: PUT/PATCH/DELETE
+
+// CORS PRE-Flight
 // OPTIONS
 
-const ACCEPTED_ORIGINS = [
-  'http://localhost:8080',
-  'http://localhost:1234',
-  'https://movies.com',
-  'https://midu.dev',
-];
-// Todos los recursos que sean MOVIES se identifican con  /movies
+// Todos los recursos que sean MOVIES se identifica con /movies
 app.get('/movies', (req, res) => {
-  const origin = req.get('origin');
-  // cuando la peticion es del mismo ORIGIN
-  if (ACCEPTED_ORIGINS.includes(origin) || !origin) {
-    res.header('Access-Control-Allow-Origin', origin);
-  }
-
   const { genre } = req.query;
   if (genre) {
-    const filteredMovies = movies.filter(
-      (movie) =>
-        movie.genre.some((g) => g.toLowerCase() === genre.toLowerCase()) //comparamos el genero de la pelicula con el genero que nos pasan en minusculas
+    const filteredMovies = movies.filter((movie) =>
+      movie.genre.some((g) => g.toLowerCase() === genre.toLowerCase())
     );
     return res.json(filteredMovies);
   }
@@ -42,17 +51,10 @@ app.get('/movies', (req, res) => {
 
 // Recuperamos una pelicula por su ID
 app.get('/movies/:id', (req, res) => {
-  // path-to-regexp: da una descripcion
-  // librería de JavaScript que convierte patrones de rutas (como /user/:id) en expresiones regulares para
-  // Coincidir y generar URLs
-  // Extraer parámetros:
   const { id } = req.params;
   const movie = movies.find((movie) => movie.id === id);
-  if (movie) {
-    res.json(movie);
-  } else {
-    res.status(404).json({ message: 'Movie not found' });
-  }
+  if (movie) return res.json(movie);
+  res.status(404).json({ message: 'Movie not found' });
 });
 
 app.post('/movies', (req, res) => {
@@ -69,19 +71,15 @@ app.post('/movies', (req, res) => {
     id: crypto.randomUUID(), // uuid v4
     ...result.data, // ❌ req.body. != No es lo mismo
   };
-  // Esto no seria REST, porque estamos guardando
-  // el estado de la aplicacion en memoria
+
+  // Esto no sería REST, porque estamos guardando
+  // el estado de la aplicación en memoria
   movies.push(newMovie);
 
   res.status(201).json(newMovie);
 });
 
 app.delete('/movies/:id', (req, res) => {
-  const origin = req.header('origin');
-  if (ACCEPTED_ORIGINS.includes(origin) || !origin) {
-    res.header('Access-Control-Allow-Origin', origin);
-  }
-
   const { id } = req.params;
   const movieIndex = movies.findIndex((movie) => movie.id === id);
 
@@ -108,27 +106,18 @@ app.patch('/movies/:id', (req, res) => {
     return res.status(404).json({ message: 'Movie not found' });
   }
 
-  const updatedMovie = {
+  const updateMovie = {
     ...movies[movieIndex],
     ...result.data,
   };
 
-  movies[movieIndex] = updatedMovie;
+  movies[movieIndex] = updateMovie;
 
-  return res.json(updatedMovie);
+  return res.json(updateMovie);
 });
 
-app.options('/movies', (req, res) => {
-  const origin = req.get('origin');
-  if (ACCEPTED_ORIGINS.includes(origin) || !origin) {
-    res.header('Access-Control-Allow-Origin', origin);
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT,PATCH, DELETE');
-  }
-  res.status(200);
-});
-
-const PORT = process.env.PORT ?? 1234; // si PORT no esta definido en el entorno, usamos 1234
+const PORT = process.env.PORT ?? 1234;
 
 app.listen(PORT, () => {
-  console.log(`Server listening on port http://localhost:${PORT}`);
+  console.log(`server listening on port http://localhost:${PORT}`);
 });
