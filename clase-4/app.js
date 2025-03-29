@@ -1,17 +1,13 @@
 import express, { json } from 'express'; // usamos require luego pasaremos a commonJS
-import { randomUUID } from 'node:crypto'; // modulo de node para hashear
 import cors from 'cors';
+import { moviesRouter } from './routes/movies.js';
 
-import { validateMovie, validatePartialMovie } from './schemas/movies.js';
-import { readJSON } from './utils.js'; // importamos la funcion readJSON
+// EN EL FUTURO: el import del json sería así:
+//import movies from './movies.json' assert { type: 'json' };
 
 //========== COMO LEER UN JSON EN ESModules ==========
 //import fs from 'node:fs';
 //const movies = JSON.parse(fs.readFileSync('./movies.json', 'utf-8'));
-
-//========== COMO LEER UN JSON EN ESModules RECOMENDADO POR AHORA ==========
-
-const movies = readJSON('./movies.json');
 
 const app = express();
 app.use(json()); // middleware que parsea el body de la request a JSON
@@ -46,83 +42,7 @@ app.disable('x-powered-by'); // deshabilitar el header X-Powered-By: Express
 // OPTIONS
 
 // Todos los recursos que sean MOVIES se identifica con /movies
-app.get('/movies', (req, res) => {
-  const { genre } = req.query;
-  if (genre) {
-    const filteredMovies = movies.filter((movie) =>
-      movie.genre.some((g) => g.toLowerCase() === genre.toLowerCase())
-    );
-    return res.json(filteredMovies);
-  }
-  res.json(movies);
-});
-
-// Recuperamos una pelicula por su ID
-app.get('/movies/:id', (req, res) => {
-  const { id } = req.params;
-  const movie = movies.find((movie) => movie.id === id);
-  if (movie) return res.json(movie);
-  res.status(404).json({ message: 'Movie not found' });
-});
-
-app.post('/movies', (req, res) => {
-  const result = validateMovie(req.body);
-
-  if (!result.success) {
-    // 422 Unprocessable Entity
-    // 400 Bad Request. Error propio del cliente. La solicitud contiene sintaxis incorrecta y no debería repetirse.
-    return res.status(400).json({ error: JSON.parse(result.error.message) });
-  }
-
-  // en base de datos
-  const newMovie = {
-    id: randomUUID(), // uuid v4
-    ...result.data, // ❌ req.body. != No es lo mismo
-  };
-
-  // Esto no sería REST, porque estamos guardando
-  // el estado de la aplicación en memoria
-  movies.push(newMovie);
-
-  res.status(201).json(newMovie);
-});
-
-app.delete('/movies/:id', (req, res) => {
-  const { id } = req.params;
-  const movieIndex = movies.findIndex((movie) => movie.id === id);
-
-  if (movieIndex === -1) {
-    return res.status(404).json({ message: 'Movie not found' });
-  }
-
-  movies.splice(movieIndex, 1);
-
-  return res.json({ message: 'Movie deleted' });
-});
-
-app.patch('/movies/:id', (req, res) => {
-  const result = validatePartialMovie(req.body);
-
-  if (!result.success) {
-    return res.status(400).json({ error: JSON.parse(result.error.message) });
-  }
-
-  const { id } = req.params;
-  const movieIndex = movies.findIndex((movie) => movie.id === id);
-
-  if (movieIndex === -1) {
-    return res.status(404).json({ message: 'Movie not found' });
-  }
-
-  const updateMovie = {
-    ...movies[movieIndex],
-    ...result.data,
-  };
-
-  movies[movieIndex] = updateMovie;
-
-  return res.json(updateMovie);
-});
+app.use('/movies', moviesRouter);
 
 const PORT = process.env.PORT ?? 1234;
 
