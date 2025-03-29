@@ -3,15 +3,15 @@ import { randomUUID } from 'node:crypto'; // modulo de node para hashear
 import cors from 'cors';
 
 import { validateMovie, validatePartialMovie } from './schemas/movies.js';
+import { readJSON } from './utils.js'; // importamos la funcion readJSON
 
 //========== COMO LEER UN JSON EN ESModules ==========
 //import fs from 'node:fs';
 //const movies = JSON.parse(fs.readFileSync('./movies.json', 'utf-8'));
 
 //========== COMO LEER UN JSON EN ESModules RECOMENDADO POR AHORA ==========
-import { createRequire } from 'node:module';
-const require = createRequire(import.meta.url);
-const movies = require('./movies.json');
+
+const movies = readJSON('./movies.json');
 
 const app = express();
 app.use(json()); // middleware que parsea el body de la request a JSON
