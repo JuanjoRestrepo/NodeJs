@@ -1,18 +1,18 @@
 import { randomUUID } from 'node:crypto';
 import { readJSON } from '../utils.js';
-const movies = readJSON('../movies.json');
 
+const movies = readJSON('./movies.json');
 // Logica de negocio
 export class MovieModel {
   // info de cómo se filtran los datos y de donde se recuperan
-  static getAll = async ({ genre }) => {
+  static async getAll({ genre }) {
     if (genre) {
       return movies.filter((movie) =>
         movie.genre.some((g) => g.toLowerCase() === genre.toLowerCase())
       );
     }
     return movies;
-  };
+  }
 
   static async getById({ id }) {
     const movie = movies.find((movie) => movie.id === id);
@@ -25,7 +25,7 @@ export class MovieModel {
   static async create({ input }) {
     const newMovie = {
       id: randomUUID(), // uuid v4
-      ...input, // ❌ req.body. != No es lo mismo
+      ...input, // req.body. != No es lo mismo
     };
 
     // Esto no sería REST, porque estamos guardando
