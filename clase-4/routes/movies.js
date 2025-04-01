@@ -10,6 +10,7 @@ export const moviesRouter = Router();
 
 moviesRouter.get('/', (req, res) => {
   const { genre } = req.query;
+  // info de cómo se filtran los datos y de donde se recuperan
   if (genre) {
     const filteredMovies = movies.filter((movie) =>
       movie.genre.some((g) => g.toLowerCase() === genre.toLowerCase())
