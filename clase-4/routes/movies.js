@@ -3,6 +3,7 @@ import { Router } from 'express';
 
 import { validateMovie, validatePartialMovie } from '../schemas/movies.js';
 import { readJSON } from './utils.js'; // importamos la funcion readJSON
+import { MovieModel } from '../models/movie.js';
 
 //========== COMO LEER UN JSON EN ESModules RECOMENDADO POR AHORA ==========
 const movies = readJSON('./movies.json');
@@ -10,13 +11,7 @@ export const moviesRouter = Router();
 
 moviesRouter.get('/', (req, res) => {
   const { genre } = req.query;
-  // info de cómo se filtran los datos y de donde se recuperan
-  if (genre) {
-    const filteredMovies = movies.filter((movie) =>
-      movie.genre.some((g) => g.toLowerCase() === genre.toLowerCase())
-    );
-    return res.json(filteredMovies);
-  }
+  const movies = MovieModel.getAll({ genre });
   res.json(movies);
 });
 
