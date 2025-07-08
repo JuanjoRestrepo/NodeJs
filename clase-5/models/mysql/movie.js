@@ -8,15 +8,17 @@ const config = {
   database: 'moviesdb',
 };
 
-const connection = mysql.createConnection(config);
+const connection = await mysql.createConnection(config);
 
 export class MovieModel {
+  
+
   static async getAll({ genre }) {
-    const result = await connection.query(
+    const [movies] = await connection.query(
       'SELECT title, year, director, duration, poster, rate, BIN_TO_UUID(id) id FROM movie;'
     );
 
-    console.log(result);
+    return movies;
   }
 
   static async getById({ id }) {}
