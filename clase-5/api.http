@@ -5,7 +5,7 @@ GET http://localhost:1234/movies
 GET http://localhost:1234/movies/33c2143c-5c40-11f0-8b9b-fc3497de0a7a
 
 ### Recuperar todas las películas de un género
-GET http://localhost:1234/movies?genre=ACTION
+GET http://localhost:1234/movies?genre=Sci-Fi
 
 ### Crear una película con POST
 POST http://localhost:1234/movies
@@ -22,7 +22,7 @@ Content-Type: application/json
 }
 
 ### Borrar una película
-DELETE http://localhost:1234/movies/fca4032c-5c4b-11f0-8b9b-fc3497de0a7a
+DELETE http://localhost:1234/movies/bb2f6c29-5c4d-11f0-8b9b-fc3497de0a7a
 
 ### Actualizar una película
 PATCH http://localhost:1234/movies/bb2f6c29-5c4d-11f0-8b9b-fc3497de0a7a

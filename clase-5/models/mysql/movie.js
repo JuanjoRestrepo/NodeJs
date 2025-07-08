@@ -13,8 +13,6 @@ const connection = await mysql.createConnection(connectionString);
 
 export class MovieModel {
   static async getAll({ genre }) {
-    console.log('getAll');
-
     if (genre) {
       const lowerCaseGenre = genre.toLowerCase();
 
@@ -36,13 +34,22 @@ export class MovieModel {
       // la query a movie_genres
       // join
       // y devolver resultados..
-      return [];
+      // Get movies for this genre using a JOIN
+      const [movies] = await connection.query(
+        `SELECT m.title, m.year, m.director, m.duration, m.poster, m.rate, BIN_TO_UUID(m.id) id
+        FROM movie m
+        JOIN movie_genres mg ON m.id = mg.movie_id
+        WHERE mg.genre_id = ?;`,
+        [id]
+      );
+      return movies;
     }
 
     const [movies] = await connection.query(
       'SELECT title, year, director, duration, poster, rate, BIN_TO_UUID(id) id FROM movie;'
     );
 
+    console.log('Movies retrieved:', movies.length);
     return movies;
   }
 
@@ -57,6 +64,7 @@ export class MovieModel {
       return null;
     }
 
+    console.log('Got movie by ID:', id);
     return movies[0];
   }
 
@@ -96,6 +104,7 @@ export class MovieModel {
       [uuid]
     );
 
+    console.log('Movie created:', movies[0]);
     return movies[0];
   }
 
@@ -104,10 +113,12 @@ export class MovieModel {
       'DELETE FROM movie WHERE id = UUID_TO_BIN(?);',
       [id]
     );
+    console.log('Movie deleted:', id);
     return result.affectedRows > 0;
   }
 
   static async update({ id, input }) {
+    console.log('Using update');
     // Build dynamic SET clause and values
     const allowedFields = [
       'title',
@@ -149,6 +160,7 @@ export class MovieModel {
       [id]
     );
 
+    console.log('Movie updated:', id);
     return movies[0];
   }
 }
