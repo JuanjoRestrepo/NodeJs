@@ -2,7 +2,7 @@
 GET http://localhost:1234/movies
 
 ### Recuperar una película por id
-GET http://localhost:1234/movies/c8a7d63f-3b04-44d3-9d95-8782fd7dcfaf
+GET http://localhost:1234/movies/33c2143c-5c40-11f0-8b9b-fc3497de0a7a
 
 ### Recuperar todas las películas de un género
 GET http://localhost:1234/movies?genre=ACTION
@@ -13,21 +13,21 @@ Content-Type: application/json
 
 {
   "sql": "SELECT * FROM users",
-  "title": "The Matrix",
-  "year": 1999,
-  "director": "Lana Wachowski",
-  "duration": 136,
-  "poster": "https://example.com/matrix.jpg",
-  "genre": ["Action", "Sci-Fi"]
+  "title": "The Godfather",
+  "year": 1972,
+  "director": "Francis Ford Coppola",
+  "duration": 175,
+  "poster": "https://example.com/godfather.jpg",
+  "genre": ["Crime", "Drama"]
 }
 
 ### Borrar una película
-DELETE http://localhost:1234/movies/dcdd0fad-a94c-4810-8acc-5f108d3b18c3
+DELETE http://localhost:1234/movies/fca4032c-5c4b-11f0-8b9b-fc3497de0a7a
 
 ### Actualizar una película
-PATCH http://localhost:1234/movies/c8a7d63f-3b04-44d3-9d95-8782fd7dcfaf
+PATCH http://localhost:1234/movies/bb2f6c29-5c4d-11f0-8b9b-fc3497de0a7a
 Content-Type: application/json
 
 {
-  "year": 2022
+  "year": 1972
 }

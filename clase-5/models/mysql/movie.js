@@ -1,23 +1,26 @@
 import mysql from 'mysql2/promise';
 
-const config = {
+const DEFAULT_CONFIG = {
   host: 'localhost',
   user: 'root',
   port: 3306,
   password: '',
   database: 'moviesdb',
 };
+const connectionString = process.env.DATABASE_URL ?? DEFAULT_CONFIG;
 
-const connection = await mysql.createConnection(config);
+const connection = await mysql.createConnection(connectionString);
 
 export class MovieModel {
   static async getAll({ genre }) {
+    console.log('getAll');
+
     if (genre) {
       const lowerCaseGenre = genre.toLowerCase();
 
-      // Get genre ids from database using genre names
+      // get genre ids from database table using genre names
       const [genres] = await connection.query(
-        'SELECT id, name FROM genre WHERE LOWER(name) = ?;', 
+        'SELECT id, name FROM genre WHERE LOWER(name) = ?;',
         [lowerCaseGenre]
       );
 
@@ -29,8 +32,10 @@ export class MovieModel {
       // get the id from the first genre result
       const [{ id }] = genres;
 
-      // You can now use the genre id to filter movies by genre if needed
-      // For now, just return an empty array as before
+      // get all movies ids from database table
+      // la query a movie_genres
+      // join
+      // y devolver resultados..
       return [];
     }
 
@@ -41,11 +46,109 @@ export class MovieModel {
     return movies;
   }
 
-  static async getById({ id }) {}
+  static async getById({ id }) {
+    const [movies] = await connection.query(
+      `SELECT title, year, director, duration, poster, rate, BIN_TO_UUID(id) id
+        FROM movie WHERE id = UUID_TO_BIN(?);`,
+      [id]
+    );
 
-  static async create({ input }) {}
+    if (movies.length === 0) {
+      return null;
+    }
 
-  static async delete({ id }) {}
+    return movies[0];
+  }
 
-  static async update({ id, input }) {}
+  static async create({ input }) {
+    const {
+      genre: genreInput, // genre is an array
+      title,
+      year,
+      duration,
+      director,
+      rate,
+      poster,
+    } = input;
+
+    // todo: crear la conexión de genre
+
+    // crypto.randomUUID()
+    const [uuidResult] = await connection.query('SELECT UUID() uuid;');
+    const [{ uuid }] = uuidResult;
+
+    try {
+      await connection.query(
+        `INSERT INTO movie (id, title, year, director, duration, poster, rate)
+          VALUES (UUID_TO_BIN("${uuid}"), ?, ?, ?, ?, ?, ?);`,
+        [title, year, director, duration, poster, rate]
+      );
+    } catch (error) {
+      // console.log puede enviarle información sensible
+      throw new Error('Error creating movie');
+      // enviar la traza a un servicio interno
+      // sendLog(error)
+    }
+
+    const [movies] = await connection.query(
+      `SELECT title, year, director, duration, poster, rate, BIN_TO_UUID(id) id
+        FROM movie WHERE id = UUID_TO_BIN(?);`,
+      [uuid]
+    );
+
+    return movies[0];
+  }
+
+  static async delete({ id }) {
+    const [result] = await connection.query(
+      'DELETE FROM movie WHERE id = UUID_TO_BIN(?);',
+      [id]
+    );
+    return result.affectedRows > 0;
+  }
+
+  static async update({ id, input }) {
+    // Build dynamic SET clause and values
+    const allowedFields = [
+      'title',
+      'year',
+      'director',
+      'duration',
+      'poster',
+      'rate',
+    ];
+    const setClauses = [];
+    const values = [];
+
+    for (const field of allowedFields) {
+      if (input[field] !== undefined) {
+        setClauses.push(`${field} = ?`);
+        values.push(input[field]);
+      }
+    }
+
+    if (setClauses.length === 0) {
+      // Nothing to update
+      return null;
+    }
+
+    values.push(id); // for WHERE clause
+
+    const [result] = await connection.query(
+      `UPDATE movie SET ${setClauses.join(', ')} WHERE id = UUID_TO_BIN(?);`,
+      values
+    );
+
+    if (result.affectedRows === 0) {
+      return null;
+    }
+
+    const [movies] = await connection.query(
+      `SELECT title, year, director, duration, poster, rate, BIN_TO_UUID(id) id
+        FROM movie WHERE id = UUID_TO_BIN(?);`,
+      [id]
+    );
+
+    return movies[0];
+  }
 }
